@@ -1,0 +1,32 @@
+#Register command
+beacon_command_register(
+    "ldapsigncheck",
+    "Check DC for relaying possibilities",
+    "Synopsis: ldapsigncheck <target DC>"
+);
+
+alias ldapsigncheck {
+    local('$barch $handle $data $args $target_dc $target_spn');
+    println(@_);
+    
+    # figure out the arch of this session
+    $barch  = barch($1);
+    
+    # read BOF file
+    $handle = openf(script_resource("compiled/ldapsigncheck $+ .$barch $+ .o"));
+    $data = readb($handle, -1);
+    closef($handle);
+    
+    if(size(@_) == 2)
+    {
+        $args = bof_pack($1, "ZZ", $2 "LDAP/$2");
+    } else {
+        berror($1, "Incorrect usage!");
+        berror($1, beacon_command_detail("ldapsigncheck"));
+        return;
+    }
+   
+    # 
+    btask($1, "Executing BofLdapSignCheck by @Cube0x0");
+    beacon_inline_execute($1, $data, "go", $args);
+}
