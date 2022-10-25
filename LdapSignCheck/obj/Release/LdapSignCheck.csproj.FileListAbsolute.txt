@@ -1,0 +1,16 @@
+C:\Users\cube0x0\Desktop\icc\LdapSignCheck\LdapSignCheck\bin\Release\LdapSignCheck.exe.config
+C:\Users\cube0x0\Desktop\icc\LdapSignCheck\LdapSignCheck\bin\Release\LdapSignCheck.exe
+C:\Users\cube0x0\Desktop\icc\LdapSignCheck\LdapSignCheck\bin\Release\LdapSignCheck.pdb
+C:\Users\cube0x0\Desktop\icc\LdapSignCheck\LdapSignCheck\bin\Release\DnsClient.xml
+C:\Users\cube0x0\Desktop\icc\LdapSignCheck\LdapSignCheck\bin\Release\Microsoft.Win32.Registry.xml
+C:\Users\cube0x0\Desktop\icc\LdapSignCheck\LdapSignCheck\bin\Release\System.Buffers.xml
+C:\Users\cube0x0\Desktop\icc\LdapSignCheck\LdapSignCheck\bin\Release\System.Diagnostics.DiagnosticSource.xml
+C:\Users\cube0x0\Desktop\icc\LdapSignCheck\LdapSignCheck\bin\Release\System.Security.AccessControl.xml
+C:\Users\cube0x0\Desktop\icc\LdapSignCheck\LdapSignCheck\bin\Release\System.Security.Principal.Windows.xml
+C:\Users\cube0x0\Desktop\icc\LdapSignCheck\LdapSignCheck\obj\Release\LdapSignCheck.csproj.AssemblyReference.cache
+C:\Users\cube0x0\Desktop\icc\LdapSignCheck\LdapSignCheck\obj\Release\LdapSignCheck.csproj.SuggestedBindingRedirects.cache
+C:\Users\cube0x0\Desktop\icc\LdapSignCheck\LdapSignCheck\obj\Release\LdapSignCheck.csproj.CoreCompileInputs.cache
+C:\Users\cube0x0\Desktop\icc\LdapSignCheck\LdapSignCheck\obj\Release\LdapSignCheck.csproj.Fody.CopyLocal.cache
+C:\Users\cube0x0\Desktop\icc\LdapSignCheck\LdapSignCheck\obj\Release\LdapSignCheck.csproj.CopyComplete
+C:\Users\cube0x0\Desktop\icc\LdapSignCheck\LdapSignCheck\obj\Release\LdapSignCheck.exe
+C:\Users\cube0x0\Desktop\icc\LdapSignCheck\LdapSignCheck\obj\Release\LdapSignCheck.pdb

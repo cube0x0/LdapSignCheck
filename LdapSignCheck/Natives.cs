@@ -43,8 +43,8 @@ namespace LdapSignCheck
             string pszPrincipal, //SEC_CHAR*
             string pszPackage, //SEC_CHAR* //"Kerberos","NTLM","Negotiative"
             int fCredentialUse,
-            IntPtr PAuthenticationID,//_LUID AuthenticationID,//pvLogonID,//PLUID
-            IntPtr pAuthData,//PVOID
+            IntPtr PAuthenticationID, //_LUID AuthenticationID,//pvLogonID,//PLUID
+            ref SEC_WINNT_AUTH_IDENTITY pAuthData,//PVOID
             IntPtr pGetKeyFn, //SEC_GET_KEY_FN
             IntPtr pvGetKeyArgument, //PVOID
             ref SECURITY_HANDLE phCredential, //SecHandle //PCtxtHandle ref
@@ -250,6 +250,31 @@ namespace LdapSignCheck
 
             public berval()
             { }
+        }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        internal struct SEC_WINNT_AUTH_IDENTITY
+        {
+            public SEC_WINNT_AUTH_IDENTITY(string domain, string user, string password)
+            {
+                User = user;
+                UserLength = (uint)user.Length;
+                Domain = domain;
+                DomainLength = (uint)domain.Length;
+                Password = password;
+                PasswordLength = (uint)password.Length;
+                Flags = SEC_WINNT_AUTH_IDENTITY_UNICODE;
+            }
+
+            //private const uint SEC_WINNT_AUTH_IDENTITY_ANSI = 0x1;
+            private const uint SEC_WINNT_AUTH_IDENTITY_UNICODE = 0x2;
+            private readonly String User;
+            private readonly uint UserLength;
+            private readonly String Domain;
+            private readonly uint DomainLength;
+            private readonly String Password;
+            private readonly uint PasswordLength;
+            private readonly uint Flags;
         }
 
         [StructLayout(LayoutKind.Sequential)]

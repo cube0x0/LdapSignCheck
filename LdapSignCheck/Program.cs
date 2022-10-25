@@ -3,24 +3,36 @@ using System.Collections.Generic;
 using System.DirectoryServices;
 using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices;
+using DnsClient;
 using static LdapSignCheck.Natives;
 
 namespace LdapSignCheck
 {
     internal class Program
     {
-        public static bool ldapCheck(string dc, bool ssl)
+        public static bool ldapCheck(string dc, string username, string password, bool ssl)
         {
             var ldap_phCredential = new SECURITY_HANDLE();
             var ldap_ptsExpiry = new SECURITY_INTEGER();
 
+            SEC_WINNT_AUTH_IDENTITY ident;
+            if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
+            {
+                ident = new SEC_WINNT_AUTH_IDENTITY("", username, password);
+            }
+            else
+            {
+                ident = new SEC_WINNT_AUTH_IDENTITY();
+            }
+
             var status = AcquireCredentialsHandle(
                 null,
                 "NTLM",
-                2,
-                IntPtr.Zero,
-                IntPtr.Zero,
+                2, // Client will use the credentials.
+                IntPtr.Zero, // Do not specify LOGON id.
+                ref ident, // User information.
                 IntPtr.Zero,
                 IntPtr.Zero,
                 ref ldap_phCredential,
@@ -216,6 +228,15 @@ namespace LdapSignCheck
             }
         }
 
+        public static uint ConvertFromIpAddressToInteger(string ipAddress)
+        {
+            var address = IPAddress.Parse(ipAddress);
+            byte[] bytes = address.GetAddressBytes();
+
+            return BitConverter.ToUInt32(bytes, 0);
+        }
+
+        public static LookupClient client = null;
         public static Dictionary<string, string> getDCs(string domain, string username, string password, string domainController)
         {
             Dictionary<string, string> list = new Dictionary<string, string>();
@@ -231,13 +252,21 @@ namespace LdapSignCheck
             DirectoryEntry directoryEntry = new DirectoryEntry(String.Concat("LDAP://", endpoint), username, password);
             DirectorySearcher searcher = new DirectorySearcher(directoryEntry);
             searcher.Filter = "(&(objectCategory=computer)(objectClass=computer)(userAccountControl:1.2.840.113556.1.4.803:=8192))";
-            searcher.PropertiesToLoad.AddRange(new string[] { "dnshostname", "Ipv4address" });
+            searcher.PropertiesToLoad.AddRange(new string[] { "dnshostname" });
             foreach (SearchResult result in searcher.FindAll())
             {
                 DirectoryEntry entry = result.GetDirectoryEntry();
-                //Console.WriteLine("dnshostname: " + entry.Properties["dnshostname"].Value);
-                //Console.WriteLine("IPv4Address: " + entry.Properties["IPv4Address"].Value);
-                list.Add(entry.Properties["dnshostname"].Value.ToString(), "");
+                string ipv4 = "";
+                string hostname = entry.Properties["dnshostname"].Value.ToString();
+                
+                if (client != null)
+                {
+                    var a = client.Query(hostname, QueryType.A);
+                    if (a.Answers.Count() > 0 && a.Answers.ARecords().Count() > 0 && !string.IsNullOrEmpty(a.Answers.ARecords().FirstOrDefault().Address.ToString()))
+                        ipv4 = a.Answers.ARecords().FirstOrDefault().Address.ToString();
+                }
+
+                list.Add(hostname, ipv4);
             }
             return list;
         }
@@ -263,7 +292,7 @@ namespace LdapSignCheck
             Console.WriteLine();
             Console.WriteLine("Examples: ");
             Console.WriteLine("LdapSignScan.exe");
-            Console.WriteLine("LdapSignScan.exe -domain htb.local -user domain_user -password Password123! -dc dc01.htb.local");
+            Console.WriteLine("LdapSignScan.exe -domain lab.local -user domain_user -password Password123! -dc-ip 192.168.1.10");
         }
 
         private static void Main(string[] args)
@@ -294,8 +323,8 @@ namespace LdapSignCheck
                     case "/PASSWORD":
                         password = args[entry.index + 1];
                         break;
-                    case "-DC":
-                    case "/DC":
+                    case "-DC-IP":
+                    case "/DC-IP":
                         domainController = args[entry.index + 1];
                         break;
                     case "-H":
@@ -304,7 +333,15 @@ namespace LdapSignCheck
                         return;
                 }
             }
-            if(!string.IsNullOrEmpty(domain) && !string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
+
+            if (!string.IsNullOrEmpty(domainController))
+            {
+                client = new LookupClient(new IPEndPoint(ConvertFromIpAddressToInteger(domainController), 53));
+                client.UseTcpOnly = true;
+                client.UseCache = false;
+            }
+
+            if (!string.IsNullOrEmpty(domain) && !string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
                 DCs = getDCs(domain, username, password, domainController);
             else
                 DCs = getDCs();
@@ -312,8 +349,16 @@ namespace LdapSignCheck
             foreach (var dc in DCs)
             {
                 Console.WriteLine("[*] Checking LDAP signing on {0} - {1}", dc.Key, dc.Value);
-                ldapCheck(dc.Key, false);
-                ldapCheck(dc.Key, true);
+                if (!string.IsNullOrEmpty(dc.Value))
+                {
+                    ldapCheck(dc.Value, username, password, false);
+                    ldapCheck(dc.Value, username, password, true);
+                }
+                else
+                {
+                    ldapCheck(dc.Key, username, password, false);
+                    ldapCheck(dc.Key, username, password, true);
+                }
                 Console.WriteLine();
             }
         }
