@@ -74,11 +74,11 @@ BOOL checkLDAP(PCHAR dc, wchar_t* spn, BOOL ssl)
         if (result == 0)
             WLDAP32$ldap_set_optionW(pLdapConnection, LDAP_OPT_SSL, LDAP_OPT_ON);
 
-        WLDAP32$ldap_get_optionW(pLdapConnection, LDAP_OPT_SIGN, result);  //LDAP_OPT_SIGN
+        WLDAP32$ldap_get_optionW(pLdapConnection, LDAP_OPT_SIGN, &result);  //LDAP_OPT_SIGN
         if (result == 0)
             WLDAP32$ldap_set_optionW(pLdapConnection, LDAP_OPT_SIGN, LDAP_OPT_ON);
 
-        WLDAP32$ldap_get_optionW(pLdapConnection, LDAP_OPT_ENCRYPT, result);  //LDAP_OPT_ENCRYPT
+        WLDAP32$ldap_get_optionW(pLdapConnection, LDAP_OPT_ENCRYPT, &result);  //LDAP_OPT_ENCRYPT
         if (result == 0)
             WLDAP32$ldap_set_optionW(pLdapConnection, LDAP_OPT_ENCRYPT, LDAP_OPT_ON);
 
